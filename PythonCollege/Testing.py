@@ -1,10 +1,3 @@
 import random
-import mysql.connector
 
-mddb = mysql.connector.connect(
-    host = "localhost",
-    user = "root",
-    password = "mysql"
-)
-
-print(mydb)
+print("This is a test of pyhton for project !!!!!!!!!!!!")
