@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRIME SCENE INVESTIGATION TERMINAL</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #0d0e12;
+            color: #d1d5db;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            border-bottom: 2px double #ef4444;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h1 { color: #ef4444; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        .section-box {
+            background-color: #161a22;
+            border: 1px solid #374151;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        h2 { color: #f59e0b; margin-top: 0; border-bottom: 1px solid #374151; padding-bottom: 5px; }
+        .card {
+            background-color: #1f2937;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 2px;
+        }
+        .evidence-card { border-left-color: #10b981; }
+        .actions { margin-top: 10px; display: flex; gap: 10px; }
+        button {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            background-color: #374151;
+            color: #fff;
+            border: 1px solid #4b5563;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover { background-color: #4b5563; }
+        button.btn-accuse { background-color: #991b1b; border-color: #b91c1c; }
+        button.btn-accuse:hover { background-color: #b91c1c; }
+        button.btn-interrogate { background-color: #1e3a8a; border-color: #2563eb; }
+        button.btn-interrogate:hover { background-color: #2563eb; }
+        #log-console {
+            margin-top: 25px;
+            background-color: #050507;
+            border: 1px solid #ef4444;
+            padding: 15px;
+            color: #10b981;
+            font-size: 0.95rem;
+            min-height: 50px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🕵️‍♂️ Case File Terminal v1.0.4</h1>
+        <p>System Online // Analyzing Local Directories for Active Investigation Database</p>
+    </header>
+
+    <div class="grid">
+        <!-- Suspect Profiles Section -->
+        <div class="section-box">
+            <h2>Suspect Logs (Suspoocs.csv)</h2>
+            <div id="suspects-container">Loading suspect parameters...</div>
+        </div>
+
+        <!-- Evidence Board Section -->
+        <div class="section-box">
+            <h2>Evidence Board (Evidoonce.csv)</h2>
+            <div id="evidence-container">Loading unlocked evidence entries...</div>
+        </div>
+    </div>
+
+    <!-- Active Detective Log Output Box -->
+    <div id="log-console">>> SYSTEM BOOT: Awaiting action parameters from active inspector...</div>
+
+    <script>
+        // Fetch background details and write components to layout
+        async function runSystemDiagnostics() {
+            try {
+                // 1. Gather and populate Suspect profiles
+                const suspectResponse = await fetch('/api/suspects');
+                const suspects = await suspectResponse.json();
+                const suspectsContainer = document.getElementById('suspects-container');
+                suspectsContainer.innerHTML = '';
+
+                suspects.forEach(suspect => {
+                    // Safe mapping parameters for custom titled spreadsheets columns
+                    const name = suspect.name || suspect.Name || Object.values(suspect)[0];
+                    const alibi = suspect.alibi || suspect.Alibi || "No logged tracking statements.";
+                    
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerHTML = `
+                        <div><strong>NAME:</strong> ${name}</div>
+                        <div><strong>ALIBI:</strong> ${alibi}</div>
+                        <div class="actions">
+                            <button class="btn-interrogate" onclick="interrogate('${name.replace(/'/g, "\\'")}')">Interrogate</button>
+                            <button class="btn-accuse" onclick="accuse('${name.replace(/'/g, "\\'")}')">Accuse Target</button>
+                        </div>
+                    `;
+                    suspectsContainer.appendChild(div);
+                });
+
+                // 2. Gather and populate Evidence Board entries
+                const evidenceResponse = await fetch('/api/evidence');
+                const evidenceList = await evidenceResponse.json();
+                const evidenceContainer = document.getElementById('evidence-container');
+                evidenceContainer.innerHTML = '';
+
+                if (evidenceList.length === 0 || evidenceList.error) {
+                    evidenceContainer.innerHTML = '<p style="color: #6b7280;">No data items discovered on board yet.</p>';
+                } else {
+                    evidenceList.forEach(clue => {
+                        const id = clue.id || clue.ID || "E?";
+                        const description = clue.description || clue.Description || clue.details || "Undocumented item artifact properties.";
+                        
+                        const div = document.createElement('div');
+                        div.className = 'card evidence-card';
+                        div.innerHTML = `<div><strong>[${id}] LOGGED PROPERTY:</strong> ${description}</div>`;
+                        evidenceContainer.appendChild(div);
+                    });
+                }
+
+            } catch (error) {
+                printToConsole("❌ SYSTEM FAULT: Broken pipeline communications querying database configurations.");
+            }
+        }
+
+        // Post target suspect name to backend logic for interrogation progression trigger
+        async function interrogate(suspectName) {
+            try {
+                const response = await fetch('/api/interrogate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: suspectName })
+                });
+                const result = await response.json();
+                printToConsole(`>> Questioning ${suspectName}:\n${result.message}`);
+                
+                // Refresh data layers to pull any newly appended progression indices
+                runSystemDiagnostics();
+            } catch (err) {
+                printToConsole("❌ TRANSMISSION ERROR: Questioning packet failed to deliver.");
+            }
+        }
+
+        // Post choice parameters to accusation judgment route
+        async function accuse(suspectName) {
+            try {
+                const response = await fetch('/api/accuse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: suspectName })
+                });
+                const result = await response.json();
+                
+                if (result.status === 'victory') {
+                    printToConsole(`🎉 ${result.title}!\n${result.message}`);
+                } else {
+                    printToConsole(`🚨 ${result.title}!\n${result.message}`);
+                }
+            } catch (err) {
+                printToConsole("❌ TRANSMISSION ERROR: Arrest warrant validation failed.");
+            }
+        }
+
+        // Helper framework script printing messages onto local custom dashboard console
+        function printToConsole(text) {
+            document.getElementById('log-console').innerText = text;
+        }
+
+        // Run framework startup diagnostics on structural layout load completion
+        window.onload = runSystemDiagnostics;
+    </script>
+</body>
+</html>
