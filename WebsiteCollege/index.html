@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Who Murdered Mr Stewart? - Case Terminal</title>
+    <style>
+        body { font-family: 'Courier New', monospace; background-color: #0d0e12; color: #d1d5db; margin: 0; padding: 20px; }
+        header { border-bottom: 2px double #ef4444; padding-bottom: 10px; margin-bottom: 20px; }
+        h1 { color: #ef4444; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .navbar ul { display: flex; list-style: none; padding: 0; background: #161a22; border: 1px solid #374151; margin: 0 0 15px 0; }
+        .navbar a { display: block; padding: 12px 20px; color: #a1a1a6; text-decoration: none; font-weight: bold; border-right: 1px solid #374151; cursor: pointer; }
+        .navbar a:hover, .navbar a.active { background: #222733; color: #ef4444; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .section-box { background-color: #161a22; border: 1px solid #374151; padding: 15px; border-radius: 4px; min-height: 450px; }
+        .game-section { display: none; }
+        .game-section.active-section { display: block; }
+        
+        h2 { color: #f59e0b; margin-top: 0; border-bottom: 1px solid #374151; padding-bottom: 5px; }
+        .card { background-color: #1f2937; border-left: 4px solid #f59e0b; padding: 12px; margin-bottom: 10px; border-radius: 2px; cursor: pointer; transition: 0.2s; }
+        .card:hover { background-color: #2d3748; }
+        .card.selected-suspect { border-left-color: #ef4444; background-color: #281c1c; }
+        .evidence-card { border-left-color: #10b981; cursor: default; }
+        
+        button { font-family: monospace; font-weight: bold; background-color: #374151; color: #fff; border: 1px solid #4b5563; padding: 6px 12px; cursor: pointer; margin-right: 5px; }
+        button:hover { background-color: #4b5563; }
+        button.btn-accuse { background-color: #991b1b; border-color: #b91c1c; }
+        button.btn-accuse:hover { background-color: #b91c1c; }
+        
+        #log-console { margin-top: 25px; background-color: #050507; border: 1px solid #ef4444; padding: 15px; color: #10b981; font-size: 1rem; min-height: 80px; white-space: pre-wrap; }
+        .active-target-banner { background: #1e293b; padding: 10px; margin-bottom: 15px; border: 1px dashed #f59e0b; color: #f59e0b; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🕵️‍♂️ Case File: Who Murdered Mr Cian Stewart?</h1>
+        <p>SYSTEM ACCESS // CLICK A SUSPECT TO BREACH THEIR DEVICE SYSTEMS</p>
+    </header>
+
+    <nav class="navbar">
+        <ul>
+            <li><a id="tab-Suspect" class="tab-link active" onclick="switchTab('Suspect')">Suspect Directory</a></li>
+            <li><a id="tab-Laptop" class="tab-link" onclick="switchTab('Laptop')">Laptop History</a></li>
+            <li><a id="tab-EMail" class="tab-link" onclick="switchTab('EMail')">Email Inbox</a></li>
+            <li><a id="tab-Notes" class="tab-link" onclick="switchTab('Notes')">Notes App</a></li>
+            <li><a id="tab-Bank" class="tab-link" onclick="switchTab('Bank')">Bank Logs</a></li>
+            <li><a id="tab-EvidenceBoard" class="tab-link" onclick="switchTab('EvidenceBoard')">Evidence Board</a></li>
+        </ul>
+    </nav>
+
+    <div class="active-target-banner" id="target-banner">
+        ⚠️ NO ACTIVE DEVICE LINK: Click a suspect card below to extract their personal device data.
+    </div>
+
+    <div class="grid">
+        <div class="section-box">
+            <div id="Suspect" class="game-section active-section">
+                <h2>Suspect Dossier Index</h2>
+                <div id="suspects-container">Loading data logs...</div>
+            </div>
+
+            <div id="Laptop" class="game-section">
+                <h2>Web Browser Search Logs</h2>
+                <div id="laptop-container">Select a suspect first to crack open history logs.</div>
+            </div>
+
+            <div id="EMail" class="game-section">
+                <h2>Intercepted Client Mail Invoices</h2>
+                <div id="email-container">Select a suspect first to intercept communications.</div>
+            </div>
+
+            <div id="Notes" class="game-section">
+                <h2>Decrypted Local Text Notes</h2>
+                <div id="notes-container">Select a suspect first to bypass local cryptography encryption keys.</div>
+            </div>
+
+            <div id="Bank" class="game-section">
+                <h2>Account Statement Ledger</h2>
+                <div id="bank-container">Select a suspect first to extract wire transfer assets.</div>
+            </div>
+
+            <div id="EvidenceBoard" class="game-section">
+                <h2>Recovered Crime Scene Assets (Evidoonce.csv)</h2>
+                <div id="evidence-container">Loading unlock metrics...</div>
+            </div>
+        </div>
+
+        <div class="section-box" style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+                <h2>Detective Field Log</h2>
+                <p>Track updates, alibi inconsistencies, and forensic outputs here as your investigation changes.</p>
+            </div>
+            <div id="log-console">>> TERMINAL INITIALIZED: Select a suspect directory line entry to begin extracting details...</div>
+        </div>
+    </div>
+
+        <script>
+        let activeSuspectName = "";
+        let suspectDeviceData = {};
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.game-section').forEach(sec => sec.classList.remove('active-section'));
+            document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active-section');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        async function fetchInitialCaseFiles() {
+            try {
+                const res = await fetch('/api/suspects');
+                const suspects = await res.json();
+                const container = document.getElementById('suspects-container');
+                container.innerHTML = '';
+
+                suspects.forEach(suspect => {
+                    // Extract fields strictly by array column positions to ignore title bugs
+                    const keys = Object.keys(suspect);
+                    
+
+                    const name = suspect["SuspectNames"] || "Unknown Suspect";
+                    const age = suspect["Age"] || "Unknown";
+                    const profession = suspect["Professions"] || "Undocumented";
+                    const eyes = suspect["EyeColour"] || "Unknown";
+                    const hair = suspect["HairColour"] || "Unknown";
+                    const height = suspect["Height"] || "Unknown";
+
+
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.id = `suspect-${name.replace(/\s+/g, '-')}`;
+                    div.onclick = () => selectActiveInvestigationTarget(name);
+                    div.innerHTML = `
+                        <div style="padding:4px;">
+                            <div><strong>NAME:</strong> ${name} (Age: ${age})</div>
+                            <div style="font-size:0.85rem; margin-top:5px; color:#a1a1a6;">
+                                👤 <strong>Profession:</strong> ${profession}<br>
+                                🔍 <strong>Physical Traits:</strong> ${height} tall, ${hair} hair, ${eyes} eyes
+                            </div>
+                            <div style="margin-top:10px;">
+                                <button onclick="interrogate('${name.replace(/'/g, "\\'")}', event)">Interrogate</button>
+                                <button class="btn-accuse" onclick="verifyAccusation('${name.replace(/'/g, "\\'")}', event)">Accuse</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+
+                const evidenceRes = await fetch('/api/evidence');
+                const clues = await evidenceRes.json();
+                const evidenceContainer = document.getElementById('evidence-container');
+                evidenceContainer.innerHTML = '';
+
+                if (clues.length === 0) {
+                    evidenceContainer.innerHTML = '<div style="color:#6b7280; padding:10px;">No entries logged to evidence index yet. Interrogate suspects to find clues.</div>';
+                } else {
+                    clues.forEach(clue => {
+                        const eKeys = Object.keys(clue);
+                        const item = clue[eKeys[0]] || "Unknown Clue Asset";
+                        const mailHint = clue[eKeys[1]] || "No emails.";
+                        const searchHint = clue[eKeys[2]] || "No searches.";
+                        const noteHint = clue[eKeys[3]] || "No notes.";
+
+                        const div = document.createElement('div');
+                        div.className = 'card evidence-card';
+                        div.innerHTML = `
+                            <div style="padding:4px;">
+                                <div style="color:#10b981; font-weight:bold;">📍 CRIME SCENE CLUE: ${item}</div>
+                                <div style="font-size:0.85rem; margin-top:5px; color:#a1a1a6; border-top:1px dashed #333; padding-top:5px;">
+                                    • Intercepted Target Mail hint: "${mailHint}"<br>
+                                    • Flagged Core Web search trail: "${searchHint}"<br>
+                                    • Recovered device text scrap: "${noteHint}"
+                                </div>
+                            </div>
+                        `;
+                        evidenceContainer.appendChild(div);
+                    });
+                }
+
+            } catch (err) {
+                printLog("❌ COMMUNICATION LOSS: Server processing pipeline disconnected.");
+            }
+        }
+
+        async function selectActiveInvestigationTarget(name) {
+            activeSuspectName = name;
+            
+            document.querySelectorAll('#suspects-container .card').forEach(c => c.classList.remove('selected-suspect'));
+            const cardElement = document.getElementById(`suspect-${name.replace(/\s+/g, '-')}`);
+            if (cardElement) cardElement.classList.add('selected-suspect');
+
+            document.getElementById('target-banner').innerText = `📡 ACTIVE LINK ESTABLISHED // Target: ${name.toUpperCase()}'s Personal Laptop File Systems Opened`;
+            printLog(`>> Syncing device metrics for ${name}... Access Granted. Click the Laptop tabs above to inspect files.`);
+
+            try {
+                const response = await fetch('/api/footprint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    suspectDeviceData = result.footprint;
+                    
+                    document.getElementById('email-container').innerHTML = `<div class="card evidence-card">📩 <strong>Incoming Mail Box:</strong><br><br>${suspectDeviceData.email}</div>`;
+                    document.getElementById('notes-container').innerHTML = `<div class="card evidence-card">📝 <strong>Saved Notepad Entry:</strong><br><br>${suspectDeviceData.notes_app}</div>`;
+                    document.getElementById('bank-container').innerHTML = `<div class="card evidence-card">💳 <strong>Transaction Ledger Properties:</strong><br><br>${suspectDeviceData.bank_history}</div>`;
+                    
+                    const searchBox = document.getElementById('laptop-container');
+                    searchBox.innerHTML = '<strong>🌐 Recent Search Engine Queries:</strong><br><br>';
+                    suspectDeviceData.search_history.forEach(query => {
+                        searchBox.innerHTML += `<div class="card evidence-card" style="border-left-color:#38bdf8;">"${query}"</div>`;
+                    });
+                }
+            } catch (err) {
+                printLog("❌ ERROR: Device data transfer package dropped.");
+            }
+        }
+
+        async function interrogate(name, event) {
+            event.stopPropagation();
+            try {
+                const response = await fetch('/api/interrogate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                const result = await response.json();
+                printLog(`>> Interrogation Output (${name}):\n${result.message}`);
+                fetchInitialCaseFiles();
+            } catch (err) {
+                printLog("❌ TRANSMISSION ERROR: Questioning routing packet delivery block.");
+            }
+        }
+
+        async function verifyAccusation(name, event) {
+            event.stopPropagation();
+            if (!confirm(`Are you completely sure you want to issue an official arrest warrant for ${name}? This will close the Stewart case.`)) return;
+
+            try {
+                const response = await fetch('/api/accuse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                const result = await response.json();
+                
+                document.body.innerHTML = `
+                    <div style="max-width:700px; margin:100px auto; padding:30px; background:#161a22; border:3px solid ${result.status === 'victory' ? '#10b981' : '#ef4444'}; text-align:center; border-radius:8px;">
+                        <h1 style="color:${result.status === 'victory' ? '#10b981' : '#ef4444'}">${result.title}</h1>
+                        <p style="font-size:1.25rem; line-height:1.6; margin-top:20px; font-family:monospace; color:#d1d5db;">${result.message}</p>
+                        <br><br>
+                        <button onclick="window.location.reload()" style="padding:10px 20px; background:#374151; color:#fff; border:1px solid #4b5563; font-family:monospace; cursor:pointer;">🔄 Boot Up New Investigation Session</button>
+                    </div>
+                `;
+            } catch (err) {
+                printLog("❌ CONSOLE FAULT: Judgment validation pipeline failure.");
+            }
+        }
+
+        function printLog(text) { document.getElementById('log-console').innerText = text; }
+
+        window.onload = fetchInitialCaseFiles;
+    </script>
+</body>
+</html>
