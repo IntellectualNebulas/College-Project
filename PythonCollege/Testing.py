@@ -1,5 +1,6 @@
 import csv
 import random
+import os  # Dynamic pathing utilities
 from flask import Flask, jsonify, request, render_template
 
 # Configured to look one folder up and inside WebsiteCollege for index.html
@@ -18,12 +19,20 @@ game_data = {
 def load_game_files():
     """Loads CSV files on startup, fixes headers automatically, and assigns a killer."""
     try:
+        # 🛠️ DYNAMIC BASE PATH RESOLUTION
+        # This finds the absolute path to the directory containing Testing.py (PythonCollege)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Build precise paths to the files inside PythonCollege/Spreadsheets/
+        suspects_path = os.path.join(base_dir, 'Spreadsheets', 'Suspoocs.csv')
+        evidence_path = os.path.join(base_dir, 'Spreadsheets', 'Evidoonce.csv')
+
         # Load suspects matching your exact file hierarchy
-        with open('PythonCollege/Spreadsheets/Suspoocs.csv', mode='r', encoding='utf-8-sig') as file:
+        with open(suspects_path, mode='r', encoding='utf-8-sig') as file:
             game_data["suspects"] = list(csv.DictReader(file))
             
         # Load evidence
-        with open('PythonCollege/Spreadsheets/Evidoonce.csv', mode='r', encoding='utf-8-sig') as file:
+        with open(evidence_path, mode='r', encoding='utf-8-sig') as file:
             game_data["evidence"] = list(csv.DictReader(file))
             
         if game_data["suspects"]:
