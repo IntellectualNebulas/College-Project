@@ -8,9 +8,9 @@
 
     <title>Case #9082 | Investigation</title>
 
-	 <link rel="stylesheet" href="styles.css">
+	 <link rel="stylesheet" href="/styles.css">
 
-    
+
 
 </head>
 
@@ -365,21 +365,34 @@ function showPage(page, button) {
 		section.classList.remove("active");
 	});
    
-   document.getElementById(page).classList.add("active");
+    document.getElementById(page).classList.add("active");
     
     document.querySelectorAll(".nav-button").forEach(function(navButton) { 
-    navButton.classList.remove("active");
+        navButton.classList.remove("active");
 	});
 	
-	button.classList.add("active")
-	}
+	button.classList.add("active");
+}
+</script> <!-- 🛠️ ADD THIS CLOSING TAG RIGHT HERE -->
 
+<div id="modual" class="modual">
+	<div class="modual-content">
+	
+		<button class="close" onclick="closeModual()">
+		x
+		</button>
+		
+		<h2 id="modualTitle"> Suspect </h2>
+		<div id="modualBody"></div>
+	</div>
+</div>
 
-</script>
-
+<script src="/linking.js"></script>
 
 
 </body>
-
 </html>
-```
+
+
+    
+
