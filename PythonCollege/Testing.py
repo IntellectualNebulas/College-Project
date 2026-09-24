@@ -53,9 +53,9 @@ def load_game_files():
                 if s_name.lower() == game_data["killer_name"].lower():
                     game_data["digital_footprints"][s_name] = {
                         "email": f"INVOICE #9082: 1x Lethal Weapon/Toxin delivered to destination matching height {suspect.get('Height')}.",
-                        "search_history": ["how to wipe clean fingerprints", "lethal poisoning symptoms", "cian stewart home address"],
+                        "search_history": ["how to wipe clean fingerprints", "Water Toxicity symptoms", "SLC found app 2026 Dumbest student"],
                         "notes_app": f"Note to self: Destroy the outfit from Tuesday night. Make sure they don't find out I am a {suspect.get('Professions')}.",
-                        "bank_history": "-£450.00 (Unregistered Cash Withdrawal) // -£89.99 (DarkWeb Marketplace)"
+                        "bank_history": "-£450.00 (Unregistered Cash Withdrawal) // -£89.99 (Water Bottle 100L) // £5.00 Bus to SLC college"
                     }
                 else:
                     game_data["digital_footprints"][s_name] = {

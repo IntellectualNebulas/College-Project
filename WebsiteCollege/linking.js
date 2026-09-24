@@ -1,5 +1,8 @@
 let totalInterrogations = 0;
+let activeSuspectName = "";
+let suspectDeviceData = {};
 
+// Handles switching tabs using the sidebar buttons
 function showPage(pageId, buttonElement) {
     document.querySelectorAll(".page").forEach(function(section) { 
         section.classList.remove("active");
@@ -14,6 +17,7 @@ function showPage(pageId, buttonElement) {
     buttonElement.classList.add("active");
 }
 
+// Queries your Python server to populate the interface elements
 async function loadCaseData() {
     try {
         const suspectResponse = await fetch('/api/suspects');
@@ -23,11 +27,12 @@ async function loadCaseData() {
         const digitalSelect = document.getElementById('digitalSelect');
         const accusationSelect = document.getElementById('accusationSelect');
         
-        suspectGrid.innerHTML = '';
-        digitalSelect.innerHTML = '<option value="">Select a suspect</option>';
-        accusationSelect.innerHTML = '<option value="">Select Suspect</option>';
+        if (suspectGrid) suspectGrid.innerHTML = '';
+        if (digitalSelect) digitalSelect.innerHTML = '<option value="">Select a suspect</option>';
+        if (accusationSelect) accusationSelect.innerHTML = '<option value="">Select Suspect</option>';
         
-        document.getElementById('suspectCount').innerText = suspects.length;
+        const suspectCountDisplay = document.getElementById('suspectCount');
+        if (suspectCountDisplay) suspectCountDisplay.innerText = suspects.length;
 
         suspects.forEach(suspect => {
             const name = suspect.SuspectNames || "Unknown Suspect";
@@ -37,60 +42,75 @@ async function loadCaseData() {
             const hair = suspect.HairColour || "Unknown";
             const height = suspect.Height || "Unknown";
 
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.style.cssText = "background:#1f2937; padding:15px; margin-bottom:12px; border-left:4px solid #f59e0b; border-radius:4px; text-align:left;";
-            card.innerHTML = `
-                <h3>${name} (Age: ${age})</h3>
-                <p style="color:#a1a1a6; font-size:0.9rem; margin-bottom:12px;">
-                    Occupation: ${profession}<br>
-                    Traits: ${height} tall, ${hair} hair, ${eyes} eyes
-                </p>
-                <button class="nav-button" style="background:#1e3a8a; color:white; padding:6px 12px; border:none; cursor:pointer; font-family:monospace; border-radius:4px;" onclick="executeInterrogation('${name.replace(/'/g, "\\\\'\")}')">
-                    Interrogate Suspect
-                </button>
-            `;
-            suspectGrid.appendChild(card);
+            if (suspectGrid) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.cssText = "background:#1f2937; padding:15px; margin-bottom:12px; border-left:4px solid #f59e0b; border-radius:4px; text-align:left; color:#fff;";
+                card.innerHTML = `
+                    <h3>${name} (Age: ${age})</h3>
+                    <p style="color:#a1a1a6; font-size:0.9rem; margin-bottom:12px;">
+                        Occupation: ${profession}<br>
+                        Traits: ${height} tall, ${hair} hair, ${eyes} eyes
+                    </p>
+                    <button class="nav-button" style="background:#1e3a8a; color:white; padding:6px 12px; border:none; cursor:pointer; font-family:monospace; border-radius:4px;" onclick='executeInterrogation("${name}")'>
+                        Interrogate Suspect
+                    </button>
+                `;
+                suspectGrid.appendChild(card);
+            }
 
-            const optionOpt = document.createElement('option');
-            optionOpt.value = name;
-            optionOpt.innerText = name;
-            digitalSelect.appendChild(optionOpt.cloneNode(true));
-            accusationSelect.appendChild(optionOpt);
+            if (digitalSelect) {
+                const optionOpt = document.createElement('option');
+                optionOpt.value = name;
+                optionOpt.innerText = name;
+                digitalSelect.appendChild(optionOpt.cloneNode(true));
+            }
+
+            if (accusationSelect) {
+                const optionOpt = document.createElement('option');
+                optionOpt.value = name;
+                optionOpt.innerText = name;
+                accusationSelect.appendChild(optionOpt);
+            }
         });
-        const evidenceResponse = await fetch('/api/evidence');
+
+                const evidenceResponse = await fetch('/api/evidence');
         const clues = await evidenceResponse.json();
         
         const evidenceGrid = document.getElementById('evidenceGrid');
-        evidenceGrid.innerHTML = '';
+        if (evidenceGrid) evidenceGrid.innerHTML = '';
         
-        document.getElementById('evidenceCount').innerText = clues.length;
+        const evidenceCountDisplay = document.getElementById('evidenceCount');
+        if (evidenceCountDisplay) evidenceCountDisplay.innerText = clues.length;
 
-        if (clues.length === 0) {
-            evidenceGrid.innerHTML = '<p style="color:#6b7280; padding:10px;">No records discovered yet. Begin interrogation logs to extract tracking lines.</p>';
-        } else {
-            clues.forEach(clue => {
-                const item = clue.ItemsFound || "Forensic Entry Log Asset";
-                const mailHint = clue.Emails || "No relevant data traces.";
-                const searchHint = clue.SearchHistory || "No query tracks.";
-                const noteHint = clue.NotesCon || "No text logs.";
+        if (evidenceGrid) {
+            if (clues.length === 0) {
+                evidenceGrid.innerHTML = '<p style="color:#6b7280; padding:10px;">No records discovered yet. Begin interrogation logs to extract tracking lines.</p>';
+            } else {
+                clues.forEach(clue => {
+                    const eKeys = Object.keys(clue);
+                    const item = clue[eKeys] || "Forensic Entry Log Asset";
+                    const mailHint = clue[eKeys] || "No relevant data traces.";
+                    const searchHint = clue[eKeys] || "No query tracks.";
+                    const noteHint = clue[eKeys] || "No text logs.";
 
-                const clueBox = document.createElement('div');
-                clueBox.style.cssText = "background:#1f2937; padding:15px; margin-bottom:12px; border-left:4px solid #10b981; border-radius:4px; text-align:left; width: 100%; box-sizing: border-box;";
-                clueBox.innerHTML = `
-                    <h4 style="color:#10b981; margin:0 0 5px 0;">DISCOVERED: ${item}</h4>
-                    <p style="font-size:0.85rem; line-height:1.5; color:#d1d5db; margin:5px 0 0 0;">
-                        Mail Trace: ${mailHint}<br>
-                        Web Search Trail: ${searchHint}<br>
-                        Device Scrap: ${noteHint}
-                    </p>
-                `;
-                evidenceGrid.appendChild(clueBox);
-            });
+                    const clueBox = document.createElement('div');
+                    clueBox.style.cssText = "background:#1f2937; padding:15px; margin-bottom:12px; border-left:4px solid #10b981; border-radius:4px; text-align:left; width: 100%; box-sizing: border-box; color:#fff;";
+                    clueBox.innerHTML = `
+                        <h4 style="color:#10b981; margin:0 0 5px 0;">DISCOVERED: ${item}</h4>
+                        <p style="font-size:0.85rem; line-height:1.5; color:#d1d5db; margin:5px 0 0 0;">
+                            Mail Trace: ${mailHint}<br>
+                            Web Search Trail: ${searchHint}<br>
+                            Device Scrap: ${noteHint}
+                        </p>
+                    `;
+                    evidenceGrid.appendChild(clueBox);
+                });
+            }
         }
 
     } catch (err) {
-        console.error("Transmission breakdown syncing framework diagnostics data:", err);
+        console.error("Pipeline Sync Error: ", err);
     }
 }
 
@@ -100,7 +120,7 @@ async function getDigitalEvidence() {
     const outputPanel = document.getElementById('digitalResults');
     
     if (!activeName) {
-        outputPanel.innerHTML = '';
+        if (outputPanel) outputPanel.innerHTML = '';
         return;
     }
 
@@ -112,26 +132,26 @@ async function getDigitalEvidence() {
         });
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success && outputPanel) {
             const logs = data.footprint;
             
             outputPanel.innerHTML = `
                 <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:15px; text-align:left;">
                     <div style="background:#161a22; padding:15px; border-top:3px solid #38bdf8; border-radius:4px;">
                         <h4 style="color:#38bdf8; margin-top:0;">Mail Invoices</h4>
-                        <p style="font-size:0.9rem; font-style:italic; color:#d1d5db;">${logs.email}</p>
+                        <p style="font-size:0.9rem; font-style:italic; color:#fff;">${logs.email}</p>
                     </div>
                     <div style="background:#161a22; padding:15px; border-top:3px solid #38bdf8; border-radius:4px;">
                         <h4 style="color:#38bdf8; margin-top:0;">Local Note Entries</h4>
-                        <p style="font-size:0.9rem; font-style:italic; color:#d1d5db;">${logs.notes_app}</p>
+                        <p style="font-size:0.9rem; font-style:italic; color:#fff;">${logs.notes_app}</p>
                     </div>
                     <div style="background:#161a22; padding:15px; border-top:3px solid #a855f7; border-radius:4px;">
                         <h4 style="color:#a855f7; margin-top:0;">Bank History</h4>
-                        <p style="font-size:0.9rem; font-style:italic; color:#d1d5db;">${logs.bank_history}</p>
+                        <p style="font-size:0.9rem; font-style:italic; color:#fff;">${logs.bank_history}</p>
                     </div>
                     <div style="background:#161a22; padding:15px; border-top:3px solid #eab308; border-radius:4px;">
                         <h4 style="color:#eab308; margin-top:0;">Web Query History Cache</h4>
-                        <ul style="padding-left:15px; margin:5px 0 0 0; font-size:0.9rem; color:#d1d5db;">
+                        <ul style="padding-left:15px; margin:5px 0 0 0; font-size:0.9rem; color:#fff;">
                             ${logs.search_history.map(query => `<li style="margin-bottom:4px;">"\${query}"</li>`).join('')}
                         </ul>
                     </div>
@@ -139,7 +159,7 @@ async function getDigitalEvidence() {
             `;
         }
     } catch (err) {
-        outputPanel.innerHTML = '<p style="color:#ef4444;">Failed to bypass network firewalls accessing hardware caches.</p>';
+        if (outputPanel) outputPanel.innerHTML = '<p style="color:#ef4444;">Failed to bypass network firewalls accessing hardware caches.</p>';
     }
 }
 
@@ -154,14 +174,15 @@ async function executeInterrogation(suspectName) {
         
         if (outcomes.new_evidence_unlocked) {
             totalInterrogations++;
-            document.getElementById('interrogationCount').innerText = totalInterrogations;
+            const interrogationCountDisplay = document.getElementById('interrogationCount');
+            if (interrogationCountDisplay) interrogationCountDisplay.innerText = totalInterrogations;
         }
 
         triggerCaseModal("Interrogation Terminal Output", outcomes.message);
         loadCaseData();
 
     } catch (err) {
-        triggerCaseModal("System Fault", "Failed to transfer questioning parameters down to processing loops.");
+        console.error(err);
     }
 }
 
@@ -200,29 +221,34 @@ async function makeAccusation() {
 }
 
 function triggerCaseModal(title, bodyText) {
-    document.getElementById('modualTitle').innerText = title;
-    document.getElementById('modualBody').innerText = bodyText;
+    const modalTitle = document.getElementById('modualTitle');
+    const modalBody = document.getElementById('modualBody');
+    if (modalTitle) modalTitle.innerText = title;
+    if (modalBody) modalBody.innerText = bodyText;
     
     const modalElement = document.getElementById('modual');
-    modalElement.style.display = 'block';
-    modalElement.style.position = 'fixed';
-    modalElement.style.zIndex = '999';
-    modalElement.style.left = '0';
-    modalElement.style.top = '0';
-    modalElement.style.width = '100%';
-    modalElement.style.height = '100%';
-    modalElement.style.backgroundColor = 'rgba(0,0,0,0.75)';
-    
-    const contentBox = modalElement.querySelector('.modual-content');
-    if (contentBox) {
-        contentBox.style.cssText = "background:#161a22; color:#fff; border:1px solid #ff5555; max-width:500px; margin:15% auto; padding:20px; border-radius:4px; position:relative; text-align:left;";
-        const closeBtn = contentBox.querySelector('.close');
-        if (closeBtn) closeBtn.style.cssText = "position:absolute; right:15px; top:10px; background:none; border:none; color:#a1a1a6; font-size:1.3rem; cursor:pointer;";
+    if (modalElement) {
+        modalElement.style.display = 'block';
+        modalElement.style.position = 'fixed';
+        modalElement.style.zIndex = '999';
+        modalElement.style.left = '0';
+        modalElement.style.top = '0';
+        modalElement.style.width = '100%';
+        modalElement.style.height = '100%';
+        modalElement.style.backgroundColor = 'rgba(0,0,0,0.75)';
+        
+        const contentBox = modalElement.querySelector('.modual-content');
+        if (contentBox) {
+            contentBox.style.cssText = "background:#161a22; color:#fff; border:1px solid #ff5555; max-width:500px; margin:15% auto; padding:20px; border-radius:4px; position:relative; text-align:left;";
+            const closeBtn = contentBox.querySelector('.close');
+            if (closeBtn) closeBtn.style.cssText = "position:absolute; right:15px; top:10px; background:none; border:none; color:#a1a1a6; font-size:1.3rem; cursor:pointer;";
+        }
     }
 }
 
 function closeModual() {
-    document.getElementById('modual').style.display = 'none';
+    const modalElement = document.getElementById('modual');
+    if (modalElement) modalElement.style.display = 'none';
 }
 
 window.onload = loadCaseData;
