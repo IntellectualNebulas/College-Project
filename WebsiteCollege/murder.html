@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Case #9082 | Investigation</title>
+
+	 <link rel="stylesheet" href="/styles.css">
+
+
+
+</head>
+
+
+<body>
+
+
+
+
+<div class="sidebar">
+
+    <div class="logo">
+
+        <h1>🔎 DETECTIVE</h1>
+
+        <p>CASE MANAGEMENT SYSTEM</p>
+
+    </div>
+
+
+    <div class="menu-title">
+        INVESTIGATION
+    </div>
+
+
+    <button
+        class="nav-button active"
+        onclick="showPage('dashboard', this)">
+
+        🏠 &nbsp; Dashboard
+
+    </button>
+
+
+    <button
+        class="nav-button"
+        onclick="showPage('evidence', this)">
+
+        📌 &nbsp; Evidence Board
+
+    </button>
+
+
+    <button
+        class="nav-button"
+        onclick="showPage('suspects', this)">
+
+        👤 &nbsp; Suspects
+
+    </button>
+
+
+    <button
+        class="nav-button"
+        onclick="showPage('digital', this)">
+
+        💻 &nbsp; Digital Evidence
+
+    </button>
+
+
+    <div class="menu-title">
+        CASE
+    </div>
+
+
+    <button
+        class="nav-button"
+        onclick="showPage('accuse', this)">
+
+        ⚠️ &nbsp; Make Accusation
+
+    </button>
+
+</div>
+
+
+
+
+<div class="main">
+
+
+  
+
+    <div class="topbar">
+
+        <div class="case-number">
+
+            CASE:
+            <strong>#9082</strong>
+
+            &nbsp; | &nbsp;
+
+            CIAN STEWART
+
+        </div>
+
+
+        <div class="status">
+
+            <div class="status-dot"></div>
+
+            CASE ACTIVE
+
+        </div>
+
+    </div>
+
+
+
+    <div class="content">
+    	<section id = "dashboard" class = "page active">
+    	
+    	<div class = "page-title">
+    	<small>Investigation</small>
+    	
+    	<h2>Detective Dashboard</h2>
+    	
+    	<p>
+    		Welcome Detective, Review the case 
+    		following the investigation steps
+    	</p>
+    	
+   		</div>
+   		
+   		
+   		<div class = "case-introduction">
+   			<h3> Case #9028 - Cian Stewart </h3>
+   			
+   			<p> A serious crime has been committed. 
+   			
+   			Several people are connected to the investigation and one is responsible.</p>
+   			
+   			<p>Examine the evidence, investigate each suspect and use digital information to build your case.</p>
+   		</div>
+   		
+   		
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">
+                        Suspects
+                    </div>
+                    <div
+                        class="stat-number" id="suspectCount">
+                        -
+                    </div>
+                </div>
+
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Evidence Unlocked
+                    </div>
+
+                    <div
+                        class="stat-number" id="evidenceCount">
+                        -
+                    </div>
+                </div>
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Interrogations
+                    </div>
+
+                    <div class="stat-number" id="interrogationCount">
+
+                        0
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="steps-container">
+
+                <h3>Investigation Progress</h3>
+
+
+                <div class="steps">
+
+                    <div class="step complete">
+                        <div class="step-circle">
+                            1
+                        </div>
+                        <h4>Case File</h4>
+                        <p>
+                            Review case
+                        </p>
+                    </div>
+
+
+                    <div class="step active">
+                        <div class="step-circle">
+                            2
+                        </div>
+                        <h4>Evidence</h4>
+                        <p>
+                            Find clues
+                        </p>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-circle">
+                            3
+                        </div>
+                        <h4>Suspects</h4>
+                        <p>
+                            Investigate
+                        </p>
+
+                    </div>
+
+                    <div class="step">
+                        <div class="step-circle">
+                            4
+                        </div>
+                        <h4>Interrogate</h4>
+                        <p>
+                            Question
+                        </p>
+                    </div>
+                    
+                    <div class="step">
+
+                        <div class="step-circle">
+                            5
+                        </div>
+                        <h4>Accuse</h4>
+                        <p>
+                            Solve case
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+		<section id = "evidence"  class= "page">
+		
+		<div class = "page-title">
+		
+			<small>Investigation Evidence</small>
+			<h2>Evidence Board</h2>
+			<p>Clues discovered through your investigation.</p>
+		</div>
+		
+		<div class = "evidence-board">
+
+			<div class = "board-top">
+				<div>
+					<h3> CASE #9028 </h3>
+					<p>Evidence and investigation notes.</p>
+				</div>
+				
+				<div class = "evidence-grid" id = "evidenceGrid">
+				Loading evidence...
+				</div>
+			</div>
+     
+		</section>
+		
+		
+		<section id = "suspects" class = "page">
+		
+			<div class = "page-title">
+				<small>Persons of Interest</small>
+				<h2>Suspect Database</h2>
+				<p>Review the people connected to the case.</p>
+			</div>
+			
+			<div id = "suspectGrid" class = "suspect-grid">
+			Loading suspects...
+			</div>
+			
+		</section>
+		
+		<section id = "digital" class = "page">
+		
+			<div class = "page-title">
+				<small>Digital Investigation</small>
+				<h2>Digital Evidence</h2>
+				<p>Review the suspects digital evidence.</p>
+			</div>
+			
+			<select id = "digitalSelect" class = "select" onchange = "getDigitalEvidence()">
+			
+				<option value =  "">
+					Select a suspect
+				</option>
+				
+			</select>
+			
+			<div id = "digitalResults" class = "digital-results">
+			</div>
+			
+		</section>
+		
+		<section id = "accuse" class = "page">
+		
+			<div class = "page-title">
+				<small>Final Stage</small>
+				<h2> Make Accusation</h2>
+				<p>Decide who you believe committed</p>
+			</div>
+			
+			<div class = "accusation-box">
+				<div class = "warning">
+				⚠
+				</div>
+				
+				<h2>Final Accusation</h2>
+				<p>Make sure you have examined all evidence carefully before making your decision, detective.
+				If you choose the wrong suspect you will have failed the case. </p>
+				
+				<select id = "accusationSelect" class = "select">
+					<option value = "">
+					Select Suspect
+					</option>
+					
+				</select>
+				
+				<br><br>
+				
+				<button class = "button" onclick = "makeAccusation()">
+				CONFIRM ACCUSATION
+				</button>
+				
+			</div>
+		</section>
+	</div>
+	
+</div>
+
+<div id = "modual" class = "modual">
+	<div class ="modual-content">
+	
+		<button class = "close" onclick = "closeModual()">
+		x
+		</button>
+		
+		<h2 id = "modualTitle"> Suspect </h2>
+		<div id = "modualBody"></div>
+	</div>
+	
+`
+<script>
+function showPage(page, button) {
+    document.querySelectorAll(".page").forEach(function(section) { 
+        section.classList.remove("active");
+    });
+   
+    document.getElementById(page).classList.add("active");
+    
+    document.querySelectorAll(".nav-button").forEach(function(navButton) { 
+        navButton.classList.remove("active");
+    });
+    
+    button.classList.add("active");
+}
+</script>
+
+<div id="modual" class="modual" style="display: none;">
+    <div class="modual-content">
+        <button class="close" onclick="closeModual()">x</button>
+        <h2 id="modualTitle">Suspect</h2>
+        <div id="modualBody"></div>
+    </div>
+</div>
+
+<script src="/linking.js"></script>
+
+</body>
+</html>
+
+
+    
+
